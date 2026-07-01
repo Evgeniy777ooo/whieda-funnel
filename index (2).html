@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Whieda - Воронка</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg: #0a0a14;
+            --card-bg: #141428;
+            --accent: #7c5cfc;
+            --accent-light: #9b8af7;
+            --text: #e8e8f0;
+            --text-secondary: #9898b0;
+            --success: #00d68f;
+            --border: rgba(124, 92, 252, 0.2);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg); color: var(--text);
+            min-height: 100vh; padding: 16px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .container { max-width: 400px; width: 100%; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .logo {
+            font-size: 36px; font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; letter-spacing: -1px;
+        }
+        .progress { display: flex; gap: 8px; justify-content: center; margin-bottom: 20px; }
+        .progress-dot {
+            width: 40px; height: 4px; border-radius: 4px;
+            background: #252540; transition: all 0.3s ease;
+        }
+        .progress-dot.active { background: var(--accent); box-shadow: 0 0 12px rgba(124, 92, 252, 0.5); }
+        .progress-dot.done { background: var(--success); }
+        .card {
+            background: var(--card-bg); border-radius: 20px; padding: 24px 20px;
+            border: 1px solid var(--border); margin-bottom: 12px;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .step-badge {
+            display: inline-block; background: rgba(124, 92, 252, 0.15);
+            color: var(--accent-light); padding: 6px 14px; border-radius: 20px;
+            font-size: 13px; font-weight: 600; margin-bottom: 16px;
+        }
+        .card-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; line-height: 1.3; }
+        .card-desc { font-size: 14px; color: var(--text-secondary); margin-bottom: 18px; line-height: 1.5; }
+        .link-card {
+            background: rgba(124, 92, 252, 0.08); border: 1px solid rgba(124, 92, 252, 0.25);
+            border-radius: 14px; padding: 14px; margin-bottom: 10px;
+            display: flex; align-items: center; gap: 12px; cursor: pointer;
+            transition: all 0.2s; text-decoration: none; color: var(--text);
+        }
+        .link-card:active { transform: scale(0.97); background: rgba(124, 92, 252, 0.18); }
+        .link-icon { font-size: 28px; flex-shrink: 0; }
+        .link-info { overflow: hidden; }
+        .link-label { font-size: 14px; font-weight: 600; color: var(--accent-light); }
+        .link-url { font-size: 11px; color: #666; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .btn {
+            width: 100%; padding: 15px; border-radius: 14px; font-size: 15px;
+            font-weight: 600; border: none; cursor: pointer; transition: all 0.2s;
+            text-align: center; font-family: inherit; margin-top: 8px;
+        }
+        .btn:active { transform: scale(0.96); }
+        .btn-primary { background: linear-gradient(135deg, var(--accent), #6952e0); color: white; box-shadow: 0 4px 20px rgba(124, 92, 252, 0.35); }
+        .btn-outline { background: transparent; color: var(--accent-light); border: 2px solid rgba(124, 92, 252, 0.4); }
+        .btn-success { background: linear-gradient(135deg, var(--success), #00b87a); color: white; }
+        .hidden { display: none !important; }
+        .completed-icon { font-size: 72px; text-align: center; margin-bottom: 12px; animation: bounce 0.6s ease; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        .back-btn {
+            position: fixed; top: 12px; left: 12px;
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+            color: #888; padding: 8px 14px; border-radius: 20px; font-size: 13px;
+            cursor: pointer; z-index: 10; font-family: inherit;
+        }
+    </style>
+</head>
+<body>
+    <button class="back-btn hidden" id="backBtn" onclick="prevStep()">← Назад</button>
+    <div class="container">
+        <div class="header"><div class="logo">Whieda</div></div>
+        <div class="progress" id="progress">
+            <div class="progress-dot active" data-step="1"></div>
+            <div class="progress-dot" data-step="2"></div>
+            <div class="progress-dot" data-step="3"></div>
+            <div class="progress-dot" data-step="4"></div>
+        </div>
+        <div class="card" id="step1">
+            <div class="step-badge">Шаг 1 из 4</div>
+            <div class="card-title">🎥 Видео о компании</div>
+            <div class="card-desc">Посмотрите короткий 6-минутный ролик о нашей миссии, ценностях и продукте</div>
+            <div class="link-card" onclick="openLink('https://t.me/c/2175484809/2/589')">
+                <span class="link-icon">▶️</span>
+                <div class="link-info"><div class="link-label">Смотреть в Telegram</div><div class="link-url">t.me/c/2175484809/2/589</div></div>
+            </div>
+            <button class="btn btn-primary" onclick="nextStep()">✅ Смотрел(а), далее</button>
+        </div>
+        <div class="card hidden" id="step2">
+            <div class="step-badge">Шаг 2 из 4</div>
+            <div class="card-title">📊 Презентация Whieda</div>
+            <div class="card-desc">Запись презентации от 25.09.25 — продукт в действии</div>
+            <div class="link-card" onclick="openLink('https://youtu.be/P40J2howQeM')">
+                <span class="link-icon">📺</span>
+                <div class="link-info"><div class="link-label">YouTube</div><div class="link-url">youtu.be/P40J2howQeM</div></div>
+            </div>
+            <div class="link-card" onclick="openLink('https://rutube.ru/video/private/6f3260afb0ab352edf7bd6d7762f149a/?p=fMkOLl0G5YSYSoygtTAWag')">
+                <span class="link-icon">🎬</span>
+                <div class="link-info"><div class="link-label">Rutube</div><div class="link-url">rutube.ru/video/private/...</div></div>
+            </div>
+            <button class="btn btn-primary" onclick="nextStep()">🚀 Продолжить</button>
+        </div>
+        <div class="card hidden" id="step3">
+            <div class="step-badge">Шаг 3 из 4</div>
+            <div class="card-title">💬 Чат знакомств Whieda</div>
+            <div class="card-desc">Присоединяйтесь к сообществу! Обсуждение бизнеса, продуктов и поддержка 24/7</div>
+            <div class="link-card" onclick="openLink('https://t.me/+5sd6f5Ujg6YwZWYy')">
+                <span class="link-icon">👥</span>
+                <div class="link-info"><div class="link-label">Войти в Telegram-чат</div><div class="link-url">t.me/+5sd6f5Ujg6YwZWYy</div></div>
+            </div>
+            <button class="btn btn-outline" onclick="openLink('https://t.me/+5sd6f5Ujg6YwZWYy')">💬 Открыть чат</button>
+            <button class="btn btn-primary" onclick="nextStep()">➡️ Далее</button>
+        </div>
+        <div class="card hidden" id="step4">
+            <div class="step-badge">Шаг 4 из 4</div>
+            <div class="card-title">🌍 Сайты компании</div>
+            <div class="card-desc">Выберите ваш регион для продолжения:</div>
+            <div class="link-card" onclick="openLink('https://www.whieda.org/#/')">
+                <span class="link-icon">🇷🇺</span>
+                <div class="link-info"><div class="link-label">Россия</div><div class="link-url">whieda.org</div></div>
+            </div>
+            <div class="link-card" onclick="openLink('https://eu.whieda.org/#/')">
+                <span class="link-icon">🇪🇺</span>
+                <div class="link-info"><div class="link-label">Европа</div><div class="link-url">eu.whieda.org</div></div>
+            </div>
+            <button class="btn btn-success" onclick="completeFunnel()">🎉 Завершить</button>
+        </div>
+        <div class="card hidden" id="completed">
+            <div class="completed-icon">🎯</div>
+            <div class="card-title" style="text-align:center;">Отлично!</div>
+            <div class="card-desc" style="text-align:center;">Вы прошли всю воронку Whieda.<br>Возвращайтесь в чат с ботом — мы уже готовим для вас персональное предложение!</div>
+            <button class="btn btn-outline" onclick="restart()">🔄 Пройти заново</button>
+            <button class="btn btn-primary" onclick="closeApp()">✕ Закрыть</button>
+        </div>
+    </div>
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand(); tg.ready();
+        const userData = {
+            telegram_id: tg.initDataUnsafe?.user?.id || 'unknown',
+            first_name: tg.initDataUnsafe?.user?.first_name || 'Гость',
+            username: tg.initDataUnsafe?.user?.username || 'нет',
+            language: tg.initDataUnsafe?.user?.language_code || 'ru',
+            start_time: new Date().toISOString(), current_step: 1,
+            completed_steps: [], completed: false, finish_time: null
+        };
+        let currentStep = 1; const totalSteps = 4;
+        function updateUI() {
+            for (let i = 1; i <= totalSteps; i++) document.getElementById('step' + i).classList.add('hidden');
+            document.getElementById('completed').classList.add('hidden');
+            if (currentStep <= totalSteps) document.getElementById('step' + currentStep).classList.remove('hidden');
+            else document.getElementById('completed').classList.remove('hidden');
+            document.querySelectorAll('.progress-dot').forEach((dot, i) => {
+                dot.classList.remove('active', 'done');
+                if (i + 1 < currentStep) dot.classList.add('done');
+                if (i + 1 === currentStep && currentStep <= totalSteps) dot.classList.add('active');
+                if (currentStep > totalSteps) dot.classList.add('done');
+            });
+            const backBtn = document.getElementById('backBtn');
+            backBtn.classList.toggle('hidden', currentStep <= 1 || currentStep > totalSteps);
+            userData.current_step = currentStep > totalSteps ? totalSteps : currentStep;
+        }
+        function nextStep() {
+            if (currentStep <= totalSteps) { userData.completed_steps.push(currentStep); userData.completed_steps = [...new Set(userData.completed_steps)]; }
+            currentStep++; updateUI(); sendDataToBot(); window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        function prevStep() {
+            if (currentStep > 1 && currentStep <= totalSteps) { currentStep--; updateUI(); sendDataToBot(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+        }
+        function completeFunnel() {
+            userData.completed_steps.push(4); userData.completed_steps = [...new Set(userData.completed_steps)];
+            userData.completed = true; userData.finish_time = new Date().toISOString();
+            currentStep = totalSteps + 1; updateUI(); sendDataToBot(); window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        function restart() {
+            currentStep = 1; userData.current_step = 1; userData.completed_steps = [];
+            userData.completed = false; userData.finish_time = null; updateUI();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        function sendDataToBot() {
+            tg.sendData(JSON.stringify({...userData, action: currentStep > totalSteps ? 'completed' : 'progress', timestamp: new Date().toISOString()}));
+        }
+        function openLink(url) { tg.openLink(url); }
+        function closeApp() { tg.close(); }
+        sendDataToBot(); updateUI();
+    </script>
+</body>
+</html>
